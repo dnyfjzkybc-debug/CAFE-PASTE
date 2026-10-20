@@ -869,8 +869,8 @@
   async function testCafeConnection() {
     const { data, error } = await cafeDB
       .from("products")
-      .select("id, name, category, price")
-      .eq("is_active", true);
+     .select("name, category, price")
+      
 
     if (error) {
       console.error("Supabase connection error:", error.message);
