@@ -866,21 +866,49 @@
     SUPABASE_PUBLISHABLE_KEY
   );
 
-  async function testCafeConnection() {
-    const { data, error } = await cafeDB
-      .from("products")
-     .select("name, category, price")
-      
+async function testCafeConnection() {
+  const { data, error } = await cafeDB
+    .from("products")
+    .select("name, category, price");
 
-    if (error) {
-      console.error("Supabase connection error:", error.message);
+  if (error) {
+    console.error("Supabase connection error:", error.message);
+    return;
+  }
+
+  const existingNames = new Set(
+    products.map(product => product.name.toLowerCase())
+  );
+
+  data.forEach((row, index) => {
+    const name = String(row.name || "").trim();
+
+    // Ignore empty database records and duplicates.
+    if (!name || existingNames.has(name.toLowerCase())) {
       return;
     }
 
-    console.log("CAFE-PASTE connected!");
-    console.log("Active products:", data);
-  }
+    const parsedPrice = Number(String(row.price ?? "").trim());
 
+    products.push({
+      id: 1000 + index,
+      name: name,
+      category: String(row.category || "Other").trim(),
+      price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
+      description: "Freshly made at CAFE-PASTE.",
+      image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=80"
+    });
+
+    existingNames.add(name.toLowerCase());
+  });
+
+  renderMenu();
+
+  console.log("CAFE-PASTE connected!");
+  console.log("Products loaded from Supabase:", data);
+}
+
+  
   testCafeConnection();
 </script>
 </body>
